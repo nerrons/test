@@ -21,7 +21,9 @@ We will have a single thread for the event loop. There is only one event: Timer 
 We will also have a lot of threads to do the basic task of read URL -> fetch URL -> parsing -> write URL.The read and write should be atomic, but the execution in the middle can be done concurrently without any issue.
 We will use a data structure that supports atomic read and write to avoid data races.
 
-**That very data structure would be…**(From course project pptx page 5)
+**That very data structure would be…** 
+
+(From course project pptx page 5)
 <Buffer List> ← write ← <Worker/Fetcher threads> → read → <Database>
 <Buffer List> ← read ← <Indexing threads>       → write → <Database>
 
@@ -29,9 +31,11 @@ We will use a data structure that supports atomic read and write to avoid data r
 **Potential data races**
 
 a) When two CT read the IUT at the same time, both of them might mark the same URL as PROCESSING at the same time, so they might be going to fetch the same URL.See the reader-writer problem, in this case we don’t want to have multiple reads at the same time to prevent double fetching, so reading should also be atomic.
+
 **Potential deadlocks**
 
 If we allow both IBT and CT to access the buffer at the same time, then it could happen that the buffer invariant is not maintained. For example, the size of the buffer might be incorrect.
+
 **How to solve the above problems?**
 
 We will try to declare critical regions using semaphores and mutexes. We will try to use CSP to verify our model.
