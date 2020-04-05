@@ -44,13 +44,17 @@ public class Crawler {
     private void handle(final String link) {
         if (seen.containsKey(link))
             return;
+        System.out.println(link);
         seen.put(link, true);
         pending.incrementAndGet();
         executorService.execute(new Runnable() {
             public void run() {
                 List<String> links = getLinksFromUrl(link);
-                for (String link : links) {
-                    handle(link);
+                for (String l : links) {
+                    if (!l.isEmpty() && l.charAt(0) == '/') {
+                        l = link + l;
+                    }
+                    handle(l);
                 }
                 pending.decrementAndGet();
                 if (pending.get() == 0) {
@@ -68,7 +72,6 @@ public class Crawler {
         ArrayList<String> list = new ArrayList<String>(re.size());
         for (Element element : re) {
             String link = element.attributes().get("href");
-            System.out.println(link);
             list.add(link);
         }
         return list;
