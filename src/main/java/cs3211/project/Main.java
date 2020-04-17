@@ -1,17 +1,30 @@
 package cs3211.project;
 
+import java.time.Duration;
+
+import com.beust.jcommander.JCommander;
+import com.beust.jcommander.Parameter;
+
 public class Main {
+    @Parameter(names = { "-time" }, converter = TimeConverter.class)
+    Duration time;
+    @Parameter(names = { "-input" })
+    String input;
+    @Parameter(names = { "-output" })
+    String output;
+    @Parameter(names = { "-storedPageNum" })
+    int storedPageNum;
+    @Parameter(names = { "-numOfThreads" })
+    int numOfThreads = 6; // default num of threads
 
     public static void main(String[] args) throws InterruptedException {
-        if (args.length != 2) {
-            System.err.println("Invalid syntax: <baseUrl> <numOfThreads>");
-            System.exit(1);
-        }
+        Main main = new Main();
+        JCommander.newBuilder().addObject(main).build().parse(args);
+        main.run();
+    }
 
-        String baseUrl = args[0];
-        int numOfThreads = Integer.parseInt(args[1]);
-        System.out.println("Using " + numOfThreads + " threads to process " + baseUrl);
-
+    public void run() {
+        String baseUrl = "https://www.google.com/"; // TODO: update url to use input file
         Crawler crawler = new Crawler(baseUrl, numOfThreads);
         long start = System.currentTimeMillis();
         crawler.start();

@@ -29,6 +29,7 @@ dependencies {
 
     compile 'org.jsoup:jsoup:1.13.1'
     compile 'org.apache.httpcomponents:httpclient:4.5.12'
+    compile "com.beust:jcommander:1.71"
 }
 
 application {
