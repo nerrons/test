@@ -1,135 +1,44 @@
 package cs3211.project;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-
-import java.io.BufferedReader;
-import java.io.Console;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.ArrayList;
+import java.util.LinkedList;
 
 public class Crawler {
-    private final CloseableHttpClient client;
-    private final String baseUrl;
-    private final ExecutorService executorService;
-    private Object lock = new Object();
-    private ConcurrentHashMap<String, Boolean> seen = new ConcurrentHashMap<String, Boolean>();
-    private AtomicInteger pending = new AtomicInteger(0);
+    private static final int BUL_SIZE = 1; // 3;
+    private IndexedUrlTree indexedUrlTree = new IndexedUrlTree();
+    private BufferedUrlList[] bufferedUrlLists = new BufferedUrlList[BUL_SIZE];
+    private List<Thread> crawlingThreads = new ArrayList<Thread>();
+    private List<Thread> indexBuildingThreads = new ArrayList<Thread>();
 
-    public Crawler(String baseUrl, int numOfThreads) {
-        this.client = HttpClientBuilder.create().build();
-        this.baseUrl = baseUrl;
-        this.executorService = Executors.newFixedThreadPool(numOfThreads, new ThreadFactory() {
-            public Thread newThread(Runnable r) {
-                return new Thread(r, "Crawler-Worker");
-            }
-        });
-        System.out.println(baseUrl);
-    }
-
-    public int getSeenLinks() {
-        return seen.size();
-    }
-
-    private void handle(final String link) {
-        if (seen.containsKey(link))
-            return;
-        System.out.println(link);
-        seen.put(link, true);
-        pending.incrementAndGet();
-        executorService.execute(new Runnable() {
-            public void run() {
-                List<String> links = getLinksFromUrl(link);
-                for (String l : links) {
-                    if (!l.isEmpty() && l.charAt(0) == '/') {
-                        l = link + l;
-                    }
-                    handle(l);
-                }
-                pending.decrementAndGet();
-                if (pending.get() == 0) {
-                    synchronized (lock) {
-                        lock.notify();
-                    }
-                }
-            }
-        });
-    }
-
-    private List<String> getLinksFromUrl(final String url) {
-        Document doc = Jsoup.parse(getDataFromUrl(url));
-        Elements re = doc.select("a");
-        ArrayList<String> list = new ArrayList<String>(re.size());
-        for (Element element : re) {
-            String link = element.attributes().get("href");
-            list.add(link);
-        }
-        return list;
-    }
-
-    private String getDataFromUrl(String url) {
-        BufferedReader rd = null;
-        try {
-            HttpGet request = new HttpGet(url);
-            HttpResponse response = client.execute(request);
-            rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-            String line;
-            StringBuilder sb = new StringBuilder();
-            while ((line = rd.readLine()) != null) {
-                sb.append(line);
-            }
-            return sb.toString();
-        } catch (Throwable t) {
-            t.printStackTrace();
-            throw new RuntimeException("Could not fetch data from " + url);
-        } finally {
-            if (rd != null)
-                try {
-                    rd.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+    public Crawler(LinkedList<String> urls) {
+        for (int i = 0; i < bufferedUrlLists.length; i++) {
+            bufferedUrlLists[i] = new BufferedUrlList();
+            crawlingThreads.add(new Thread(new CrawlingThread(bufferedUrlLists[i], indexedUrlTree, urls)));
+            indexBuildingThreads.add(new Thread(new IndexBuildingThread(bufferedUrlLists[i], indexedUrlTree)));
         }
     }
 
     public void start() {
-        handle(baseUrl);
+        for (Thread crawlingThread : crawlingThreads) {
+            crawlingThread.start();
+        }
+        for (Thread indexBuildingThread : indexBuildingThreads) {
+            indexBuildingThread.start();
+        }
     }
 
-    public void join() {
-        synchronized (this.lock) {
-            try {
-                this.lock.wait();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
+    public ConcurrentHashMap<String, String> getAllUrlsCrawled() {
+        return indexedUrlTree.getAllUrls();
     }
 
     public void shutdown() {
-        if (client != null) {
-            try {
-                client.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        for (Thread crawlingThread : crawlingThreads) {
+            crawlingThread.interrupt();
         }
-
-        executorService.shutdown();
-        try {
-            executorService.awaitTermination(5, TimeUnit.MINUTES);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        for (Thread indexBuildingThread : indexBuildingThreads) {
+            indexBuildingThread.interrupt();
         }
     }
 }

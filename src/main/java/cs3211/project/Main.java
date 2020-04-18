@@ -1,6 +1,8 @@
 package cs3211.project;
 
 import java.time.Duration;
+import java.util.LinkedList;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
@@ -24,15 +26,23 @@ public class Main {
     }
 
     public void run() {
-        String baseUrl = "https://www.google.com/"; // TODO: update url to use input file
-        Crawler crawler = new Crawler(baseUrl, numOfThreads);
-        long start = System.currentTimeMillis();
+        // TODO: update url to use input file
+        LinkedList<String> baseUrls = new LinkedList<String>();
+        baseUrls.add("https://www.google.com/");
+        Crawler crawler = new Crawler(baseUrls);
         crawler.start();
-        crawler.join();
-        long totalTimeInMS = System.currentTimeMillis() - start;
-        crawler.shutdown();
 
-        System.out.println(crawler.getSeenLinks() + " links processed in " + (double) totalTimeInMS / 1000 + "s");
+        try {
+            Thread.sleep(time.toMillis());
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        // crawler.shutdown();
+        ConcurrentHashMap<String, String> allUrls = crawler.getAllUrlsCrawled();
+
+        for (String k : allUrls.keySet()) {
+            System.out.println(k);
+        }
     }
-
 }
