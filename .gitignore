@@ -9,3 +9,6 @@ bin
 .classpath
 .project
 .idea
+
+# Ignore crawled output result
+res.txt

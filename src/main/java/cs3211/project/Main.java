@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.time.Duration;
 import java.util.LinkedList;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,13 +14,13 @@ import com.beust.jcommander.Parameter;
 
 public class Main {
     @Parameter(names = { "-time" }, converter = TimeConverter.class)
-    Duration time;
+    Duration time = Duration.ofMinutes(1);
     @Parameter(names = { "-input" })
-    String input;
+    String input = "seed.txt";
     @Parameter(names = { "-output" })
-    String output;
+    String output = "res.txt";
     @Parameter(names = { "-storedPageNum" })
-    int storedPageNum;
+    int storedPageNum = 1000;
 
     public static void main(String[] args) throws InterruptedException {
         Main main = new Main();
@@ -44,9 +45,6 @@ public class Main {
     }
 
     private LinkedList<String> getBaseUrlsFromFile() {
-        if (input == null) {
-            input = "seed.txt"; // default value
-        }
         LinkedList<String> baseUrls = new LinkedList<String>();
         try {
             BufferedReader br = new BufferedReader(new FileReader(input));
@@ -65,7 +63,21 @@ public class Main {
     }
 
     private void presentResults(ConcurrentHashMap<String, Page> allUrls) {
-        // TODO: output result to file
+        PrintWriter writer;
+        try {
+            writer = new PrintWriter(output, "UTF-8");
+            System.out.println("Writing to " + output + "...");
+            for (Page page : allUrls.values()) {
+                writer.println(page.getParentUrl() + " --> " + page.getUrl());
+            }
+            writer.close();
+        } catch (IOException e) {
+            System.err.println("Main.presentResult error: " + e.getMessage());
+            printResults(allUrls);
+        }
+    }
+
+    private void printResults(ConcurrentHashMap<String, Page> allUrls) {
         for (Page page : allUrls.values()) {
             System.out.println(page.getParentUrl() + " --> " + page.getUrl());
         }
