@@ -1,13 +1,7 @@
 package cs3211.project;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.time.Duration;
 import java.util.LinkedList;
-import java.util.concurrent.ConcurrentHashMap;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
@@ -29,7 +23,13 @@ public class Main {
     }
 
     public void run() {
-        LinkedList<String> baseUrls = getBaseUrlsFromFile();
+        SeedReader reader = new SeedReader(input);
+        LinkedList<String> baseUrls = reader.read();
+        if (baseUrls.isEmpty()) {
+            System.out.println("No seed url provided");
+            return;
+        }
+
         Crawler crawler = new Crawler(baseUrls);
         crawler.start();
 
@@ -40,47 +40,7 @@ public class Main {
         }
 
         crawler.shutdown();
-        ConcurrentHashMap<String, Page> allUrls = crawler.getAllUrlsCrawled();
-        presentResults(allUrls);
-    }
-
-    private LinkedList<String> getBaseUrlsFromFile() {
-        LinkedList<String> baseUrls = new LinkedList<String>();
-        try {
-            BufferedReader br = new BufferedReader(new FileReader(input));
-            String line = br.readLine();
-            while (line != null) {
-                baseUrls.add(line);
-                line = br.readLine();
-            }
-            br.close();
-        } catch (FileNotFoundException e) {
-            System.err.println("File " + input + " not found");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return baseUrls;
-    }
-
-    private void presentResults(ConcurrentHashMap<String, Page> allUrls) {
-        PrintWriter writer;
-        try {
-            writer = new PrintWriter(output, "UTF-8");
-            System.out.println("Writing to " + output + "...");
-            for (Page page : allUrls.values()) {
-                writer.println(page.getParentUrl() + " --> " + page.getUrl());
-            }
-            writer.close();
-        } catch (IOException e) {
-            System.err.println("Main.presentResult error: " + e.getMessage());
-            printResults(allUrls);
-        }
-    }
-
-    private void printResults(ConcurrentHashMap<String, Page> allUrls) {
-        for (Page page : allUrls.values()) {
-            System.out.println(page.getParentUrl() + " --> " + page.getUrl());
-        }
-        System.out.println("Crawled " + allUrls.size() + " URLs in " + time.toSeconds() + " seconds");
+        ResultWriter writer = new ResultWriter(output, crawler.getAllUrlsCrawled());
+        writer.write();
     }
 }

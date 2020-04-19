@@ -1,6 +1,5 @@
 package cs3211.project;
 
-import java.io.IOException;
 import java.util.LinkedList;
 
 import org.jsoup.Jsoup;
@@ -38,9 +37,9 @@ public class CrawlingThread implements Runnable {
             Document doc = Jsoup.connect(page.getUrl()).get();
             addToBufferedUrlList(page, doc);
             extractLinks(page.getUrl(), doc);
-        } catch (IOException e) {
-            System.err.println("CrawlingThread.visit error: " + page.getUrl());
-            e.printStackTrace();
+        } catch (Exception e) {
+            System.err.println("[WARNING] CrawlingThread.visit error: " + page.getUrl() + ": " + e.getMessage());
+            // e.printStackTrace();
         }
     }
 
@@ -64,8 +63,11 @@ public class CrawlingThread implements Runnable {
     private void extractLinks(String parentUrl, Document doc) {
         Elements links = doc.select("a[href]");
         for (Element link : links) {
-            Page page = new Page(parentUrl, link.attr("abs:href"));
-            urlsToCrawl.add(page);
+            String url = link.attr("abs:href");
+            if (url != "") {
+                Page page = new Page(parentUrl, url);
+                urlsToCrawl.add(page);
+            }
         }
     }
 }
