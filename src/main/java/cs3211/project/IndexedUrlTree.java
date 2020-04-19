@@ -4,32 +4,24 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class IndexedUrlTree {
-    private ConcurrentHashMap<String, String> allUrls = new ConcurrentHashMap<String, String>();
+    private ConcurrentHashMap<String, Page> allUrls = new ConcurrentHashMap<String, Page>();
 
     public synchronized boolean contains(String url) {
-        boolean contains = allUrls.containsKey(url);
-        if (!contains) {
-            // put "" into the hash table so other threads will not crawl this url
-            allUrls.put(url, "");
-        }
-        return contains;
+        return allUrls.containsKey(url);
     }
 
     public void addPages(List<Page> pages) {
         for (Page page : pages) {
             String url = page.getUrl();
-            String content = page.getContent();
             synchronized (this) {
-                // sanity check, should NEVER happen
-                if (allUrls.get(url) != null && allUrls.get(url) != "") {
-                    System.out.println("URL " + url + " already exists in IUT!");
+                if (!allUrls.containsKey(url)) {
+                    allUrls.put(url, page);
                 }
-                allUrls.put(url, content);
             }
         }
     }
 
-    public ConcurrentHashMap<String, String> getAllUrls() {
+    public synchronized ConcurrentHashMap<String, Page> getAllUrls() {
         return allUrls;
     }
 }

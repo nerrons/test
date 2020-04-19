@@ -15,11 +15,11 @@ public class Crawler {
     private List<Thread> indexBuildingThreads = new ArrayList<Thread>();
 
     public Crawler(LinkedList<String> urls) {
-        List<LinkedList<String>> sublists = getUrlSublists(urls);
+        List<LinkedList<Page>> sublists = getUrlSublists(urls);
         for (int i = 0; i < bufferedUrlLists.length; i++) {
             bufferedUrlLists[i] = new BufferedUrlList();
             for (int j = 0; j < CT_PER_BUL; j++) {
-                LinkedList<String> url = sublists.get(i * CT_PER_BUL + j);
+                LinkedList<Page> url = sublists.get(i * CT_PER_BUL + j);
                 crawlingThreads.add(new Thread(new CrawlingThread(bufferedUrlLists[i], indexedUrlTree, url)));
             }
             indexBuildingThreads.add(new Thread(new IndexBuildingThread(bufferedUrlLists[i], indexedUrlTree)));
@@ -36,23 +36,24 @@ public class Crawler {
         }
     }
 
-    private List<LinkedList<String>> getUrlSublists(LinkedList<String> urls) {
+    private List<LinkedList<Page>> getUrlSublists(LinkedList<String> urls) {
         int numSublists = BUL_SIZE * CT_PER_BUL;
         int sublistSize = urls.size() / numSublists;
-        List<LinkedList<String>> sublists = new LinkedList<LinkedList<String>>();
+        List<LinkedList<Page>> sublists = new LinkedList<LinkedList<Page>>();
         int i = 0;
-        sublists.add(new LinkedList<String>());
+        sublists.add(new LinkedList<Page>());
         for (String url : urls) {
             if (sublists.get(i).size() == sublistSize) {
-                sublists.add(new LinkedList<String>());
+                sublists.add(new LinkedList<Page>());
                 i++;
             }
-            sublists.get(i).add(url);
+            Page page = new Page("seed", url);
+            sublists.get(i).add(page);
         }
         return sublists;
     }
 
-    public ConcurrentHashMap<String, String> getAllUrlsCrawled() {
+    public ConcurrentHashMap<String, Page> getAllUrlsCrawled() {
         return indexedUrlTree.getAllUrls();
     }
 

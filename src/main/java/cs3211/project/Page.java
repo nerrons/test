@@ -1,12 +1,17 @@
 package cs3211.project;
 
 public final class Page {
+    private String parentUrl;
     private String url;
-    private String content;
+    private String content = "";
 
-    public Page(String url, String content) {
+    public Page(String parentUrl, String url) {
+        this.parentUrl = parentUrl;
         this.url = url;
-        this.content = content;
+    }
+
+    public String getParentUrl() {
+        return this.parentUrl;
     }
 
     public String getUrl() {
@@ -15,5 +20,9 @@ public final class Page {
 
     public String getContent() {
         return this.content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
     }
 }

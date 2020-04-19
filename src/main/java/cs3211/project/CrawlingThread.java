@@ -9,11 +9,11 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 public class CrawlingThread implements Runnable {
-    private LinkedList<String> urlsToCrawl;
+    private LinkedList<Page> urlsToCrawl;
     private BufferedUrlList bufferedUrlList;
     private IndexedUrlTree indexUrlTree;
 
-    public CrawlingThread(BufferedUrlList bufferedUrlList, IndexedUrlTree indexUrlTree, LinkedList<String> urls) {
+    public CrawlingThread(BufferedUrlList bufferedUrlList, IndexedUrlTree indexUrlTree, LinkedList<Page> urls) {
         this.urlsToCrawl = urls;
         this.bufferedUrlList = bufferedUrlList;
         this.indexUrlTree = indexUrlTree;
@@ -25,26 +25,26 @@ public class CrawlingThread implements Runnable {
             if (!Crawler.IS_CRAWLING) {
                 return;
             }
-            String url = urlsToCrawl.pop();
-            if (indexUrlTree.contains(url)) {
+            Page page = urlsToCrawl.pop();
+            if (indexUrlTree.contains(page.getUrl())) {
                 continue;
             }
-            visit(url);
+            visit(page);
         }
     }
 
-    private void visit(String url) {
+    private void visit(Page page) {
         try {
-            Document doc = Jsoup.connect(url).get();
-            addToBufferedUrlList(url, doc);
-            extractLinks(doc);
+            Document doc = Jsoup.connect(page.getUrl()).get();
+            addToBufferedUrlList(page, doc);
+            extractLinks(page.getUrl(), doc);
         } catch (IOException e) {
-            System.err.println("CrawlingThread.visit error: " + url);
+            System.err.println("CrawlingThread.visit error: " + page.getUrl());
             e.printStackTrace();
         }
     }
 
-    private void addToBufferedUrlList(String url, Document doc) {
+    private void addToBufferedUrlList(Page page, Document doc) {
         synchronized (bufferedUrlList) {
             if (bufferedUrlList.isFull()) {
                 try {
@@ -56,15 +56,16 @@ public class CrawlingThread implements Runnable {
                     e.printStackTrace();
                 }
             }
-            Page page = new Page(url, doc.toString());
+            page.setContent(doc.toString());
             bufferedUrlList.addToList(page);
         }
     }
 
-    private void extractLinks(Document doc) {
+    private void extractLinks(String parentUrl, Document doc) {
         Elements links = doc.select("a[href]");
         for (Element link : links) {
-            urlsToCrawl.add(link.attr("abs:href"));
+            Page page = new Page(parentUrl, link.attr("abs:href"));
+            urlsToCrawl.add(page);
         }
     }
 }

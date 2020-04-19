@@ -39,7 +39,7 @@ public class Main {
         }
 
         crawler.shutdown();
-        ConcurrentHashMap<String, String> allUrls = crawler.getAllUrlsCrawled();
+        ConcurrentHashMap<String, Page> allUrls = crawler.getAllUrlsCrawled();
         presentResults(allUrls);
     }
 
@@ -64,10 +64,10 @@ public class Main {
         return baseUrls;
     }
 
-    private void presentResults(ConcurrentHashMap<String, String> allUrls) {
+    private void presentResults(ConcurrentHashMap<String, Page> allUrls) {
         // TODO: output result to file
-        for (String k : allUrls.keySet()) {
-            System.out.println(k);
+        for (Page page : allUrls.values()) {
+            System.out.println(page.getParentUrl() + " --> " + page.getUrl());
         }
         System.out.println("Crawled " + allUrls.size() + " URLs in " + time.toSeconds() + " seconds");
     }
