@@ -12,6 +12,9 @@ public class IndexBuildingThread implements Runnable {
     @Override
     public void run() {
         while (true) {
+            if (!Crawler.IS_CRAWLING) {
+                return;
+            }
             synchronized (bufferedUrlList) {
                 if (!bufferedUrlList.isFull()) {
                     try {

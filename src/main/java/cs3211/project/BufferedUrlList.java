@@ -11,7 +11,7 @@ public class BufferedUrlList {
         return pages;
     }
 
-    public synchronized int getListSize() {
+    public int getListSize() {
         return pages.size();
     }
 
@@ -23,8 +23,7 @@ public class BufferedUrlList {
         pages.clear();
     }
 
-    public synchronized void addToList(Page page) {
+    public void addToList(Page page) {
         pages.add(page);
-        System.out.println("BUL: addToList: " + pages.size());
     }
 }

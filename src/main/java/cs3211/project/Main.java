@@ -1,5 +1,9 @@
 package cs3211.project;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.time.Duration;
 import java.util.LinkedList;
 import java.util.concurrent.ConcurrentHashMap;
@@ -16,8 +20,6 @@ public class Main {
     String output;
     @Parameter(names = { "-storedPageNum" })
     int storedPageNum;
-    @Parameter(names = { "-numOfThreads" })
-    int numOfThreads = 6; // default num of threads
 
     public static void main(String[] args) throws InterruptedException {
         Main main = new Main();
@@ -26,9 +28,7 @@ public class Main {
     }
 
     public void run() {
-        // TODO: update url to use input file
-        LinkedList<String> baseUrls = new LinkedList<String>();
-        baseUrls.add("https://www.google.com/");
+        LinkedList<String> baseUrls = getBaseUrlsFromFile();
         Crawler crawler = new Crawler(baseUrls);
         crawler.start();
 
@@ -38,11 +38,37 @@ public class Main {
             e.printStackTrace();
         }
 
-        // crawler.shutdown();
+        crawler.shutdown();
         ConcurrentHashMap<String, String> allUrls = crawler.getAllUrlsCrawled();
+        presentResults(allUrls);
+    }
 
+    private LinkedList<String> getBaseUrlsFromFile() {
+        if (input == null) {
+            input = "seed.txt"; // default value
+        }
+        LinkedList<String> baseUrls = new LinkedList<String>();
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(input));
+            String line = br.readLine();
+            while (line != null) {
+                baseUrls.add(line);
+                line = br.readLine();
+            }
+            br.close();
+        } catch (FileNotFoundException e) {
+            System.err.println("File " + input + " not found");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return baseUrls;
+    }
+
+    private void presentResults(ConcurrentHashMap<String, String> allUrls) {
+        // TODO: output result to file
         for (String k : allUrls.keySet()) {
             System.out.println(k);
         }
+        System.out.println("Crawled " + allUrls.size() + " URLs in " + time.toSeconds() + " seconds");
     }
 }
