@@ -4,7 +4,12 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class IndexedUrlTree {
+    private int storedPageNum;
     private ConcurrentHashMap<String, Page> allUrls = new ConcurrentHashMap<String, Page>();
+
+    public IndexedUrlTree(int storedPageNum) {
+        this.storedPageNum = storedPageNum;
+    }
 
     public synchronized boolean contains(String url) {
         return allUrls.containsKey(url);
@@ -23,5 +28,9 @@ public class IndexedUrlTree {
 
     public synchronized ConcurrentHashMap<String, Page> getAllUrls() {
         return allUrls;
+    }
+
+    public synchronized boolean hasEnoughPages() {
+        return allUrls.size() >= storedPageNum;
     }
 }

@@ -1,5 +1,6 @@
 package cs3211.project;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 
 import org.jsoup.Jsoup;
@@ -7,10 +8,13 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import cs3211.project.Page.Status;
+
 public class CrawlingThread implements Runnable {
     private LinkedList<Page> urlsToCrawl;
     private BufferedUrlList bufferedUrlList;
     private IndexedUrlTree indexUrlTree;
+    private HashSet<String> errorUrls = new HashSet<>();
 
     public CrawlingThread(BufferedUrlList bufferedUrlList, IndexedUrlTree indexUrlTree, LinkedList<Page> urls) {
         this.urlsToCrawl = urls;
@@ -34,11 +38,14 @@ public class CrawlingThread implements Runnable {
 
     private void visit(Page page) {
         try {
-            Document doc = Jsoup.connect(page.getUrl()).get();
+            Document doc = Jsoup.connect(page.getUrl()).userAgent("Mozilla").get();
             addToBufferedUrlList(page, doc);
             extractLinks(page.getUrl(), doc);
         } catch (Exception e) {
+            page.setStatus(Status.Dead);
+            addToBufferedUrlList(page, null);
             System.err.println("[WARNING] CrawlingThread.visit error: " + page.getUrl() + ": " + e.getMessage());
+            errorUrls.add(page.getUrl());
             // e.printStackTrace();
         }
     }
@@ -55,7 +62,13 @@ public class CrawlingThread implements Runnable {
                     e.printStackTrace();
                 }
             }
-            page.setContent(doc.toString());
+            if (page.getStatus() == Status.Dead) {
+                // do nothing
+            } else if (indexUrlTree.hasEnoughPages()) {
+                page.setStatus(Status.Ignored);
+            } else {
+                page.setContent(doc.toString());
+            }
             bufferedUrlList.addToList(page);
         }
     }
@@ -64,7 +77,7 @@ public class CrawlingThread implements Runnable {
         Elements links = doc.select("a[href]");
         for (Element link : links) {
             String url = link.attr("abs:href");
-            if (url != "") {
+            if (url != "" && !errorUrls.contains(url)) {
                 Page page = new Page(parentUrl, url);
                 urlsToCrawl.add(page);
             }

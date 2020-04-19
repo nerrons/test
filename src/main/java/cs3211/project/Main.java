@@ -8,13 +8,13 @@ import com.beust.jcommander.Parameter;
 
 public class Main {
     @Parameter(names = { "-time" }, converter = TimeConverter.class)
-    Duration time = Duration.ofMinutes(1);
+    private Duration time = Duration.ofMinutes(1);
     @Parameter(names = { "-input" })
-    String input = "seed.txt";
+    private String input = "seed.txt";
     @Parameter(names = { "-output" })
-    String output = "res.txt";
+    private String output = "res.txt";
     @Parameter(names = { "-storedPageNum" })
-    int storedPageNum = 1000;
+    private int storedPageNum = 10;
 
     public static void main(String[] args) throws InterruptedException {
         Main main = new Main();
@@ -30,7 +30,7 @@ public class Main {
             return;
         }
 
-        Crawler crawler = new Crawler(baseUrls);
+        Crawler crawler = new Crawler(baseUrls, storedPageNum);
         crawler.start();
 
         try {
@@ -40,7 +40,7 @@ public class Main {
         }
 
         crawler.shutdown();
-        ResultWriter writer = new ResultWriter(output, crawler.getAllUrlsCrawled());
+        ResultWriter writer = new ResultWriter(output, storedPageNum, crawler.getAllUrlsCrawled());
         writer.write();
     }
 }

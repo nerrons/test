@@ -9,12 +9,17 @@ public class Crawler {
     public static volatile boolean IS_CRAWLING = false;
     private static final int BUL_SIZE = 3;
     private static final int CT_PER_BUL = 2;
-    private IndexedUrlTree indexedUrlTree = new IndexedUrlTree();
+    private IndexedUrlTree indexedUrlTree;
     private BufferedUrlList[] bufferedUrlLists = new BufferedUrlList[BUL_SIZE];
     private List<Thread> crawlingThreads = new ArrayList<Thread>();
     private List<Thread> indexBuildingThreads = new ArrayList<Thread>();
 
-    public Crawler(LinkedList<String> urls) {
+    public Crawler(LinkedList<String> urls, int storedPageNum) {
+        this.indexedUrlTree = new IndexedUrlTree(storedPageNum);
+        createThreads(urls);
+    }
+
+    private void createThreads(LinkedList<String> urls) {
         List<LinkedList<Page>> sublists = getUrlSublists(urls);
         for (int i = 0; i < bufferedUrlLists.length; i++) {
             bufferedUrlLists[i] = new BufferedUrlList();
@@ -23,16 +28,6 @@ public class Crawler {
                 crawlingThreads.add(new Thread(new CrawlingThread(bufferedUrlLists[i], indexedUrlTree, url)));
             }
             indexBuildingThreads.add(new Thread(new IndexBuildingThread(bufferedUrlLists[i], indexedUrlTree)));
-        }
-    }
-
-    public void start() {
-        Crawler.IS_CRAWLING = true;
-        for (Thread crawlingThread : crawlingThreads) {
-            crawlingThread.start();
-        }
-        for (Thread indexBuildingThread : indexBuildingThreads) {
-            indexBuildingThread.start();
         }
     }
 
@@ -51,6 +46,16 @@ public class Crawler {
             sublists.get(i).add(page);
         }
         return sublists;
+    }
+
+    public void start() {
+        Crawler.IS_CRAWLING = true;
+        for (Thread crawlingThread : crawlingThreads) {
+            crawlingThread.start();
+        }
+        for (Thread indexBuildingThread : indexBuildingThreads) {
+            indexBuildingThread.start();
+        }
     }
 
     public ConcurrentHashMap<String, Page> getAllUrlsCrawled() {

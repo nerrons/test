@@ -7,11 +7,14 @@ import java.io.UnsupportedEncodingException;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ResultWriter {
+    private int numPagesWritten = 0;
+    private int storedPageNum;
     private String outputFile;
     private ConcurrentHashMap<String, Page> result;
 
-    public ResultWriter(String outputFile, ConcurrentHashMap<String, Page> result) {
+    public ResultWriter(String outputFile, int storedPageNum, ConcurrentHashMap<String, Page> result) {
         this.outputFile = outputFile;
+        this.storedPageNum = storedPageNum;
         this.result = result;
     }
 
@@ -29,9 +32,27 @@ public class ResultWriter {
     private void writeToFile() throws FileNotFoundException, UnsupportedEncodingException {
         PrintWriter writer = new PrintWriter(outputFile, "UTF-8");
         for (Page page : result.values()) {
-            writer.println(page.getParentUrl() + " --> " + page.getUrl());
+            String line = page.getParentUrl() + " --> " + page.getUrl() + " : " + writeContentAndGetStatus(page);
+            writer.println(line);
         }
         writer.close();
+    }
+
+    private String writeContentAndGetStatus(Page page) {
+        switch (page.getStatus()) {
+            case Dead:
+                return "dead-url";
+            case Ignored:
+                return "ignored";
+            case Crawled:
+                if (numPagesWritten >= storedPageNum)
+                    return "ignored";
+                String fileName = "page" + numPagesWritten + ".html";
+                numPagesWritten++;
+                return fileName;
+            default:
+                return "";
+        }
     }
 
     private void writeOutStdout() {

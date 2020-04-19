@@ -4,6 +4,12 @@ public final class Page {
     private String parentUrl;
     private String url;
     private String content = "";
+    private Status status = Status.Crawled;
+
+    public enum Status {
+        // status of the page content
+        Crawled, Dead, Ignored
+    }
 
     public Page(String parentUrl, String url) {
         this.parentUrl = parentUrl;
@@ -24,5 +30,13 @@ public final class Page {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public Status getStatus() {
+        return this.status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
     }
 }
