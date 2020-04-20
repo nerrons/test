@@ -14,7 +14,7 @@ public class Main {
     @Parameter(names = { "-output" })
     private String output = "res.txt";
     @Parameter(names = { "-storedPageNum" })
-    private int storedPageNum = 10;
+    private int storedPageNum = 100;
 
     public static void main(String[] args) throws InterruptedException {
         Main main = new Main();

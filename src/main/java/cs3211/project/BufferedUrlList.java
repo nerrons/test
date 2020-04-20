@@ -5,7 +5,7 @@ import java.util.List;
 
 public class BufferedUrlList {
     private List<Page> pages = new ArrayList<Page>();
-    public static final int LIST_LIMIT = 10;
+    public static final int LIST_LIMIT = 100;
 
     public List<Page> getPages() {
         return pages;

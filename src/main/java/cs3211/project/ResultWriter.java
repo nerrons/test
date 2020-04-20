@@ -1,5 +1,6 @@
 package cs3211.project;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -7,6 +8,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ResultWriter {
+    private static String htmlDirName = "html";
     private int numPagesWritten = 0;
     private int storedPageNum;
     private String outputFile;
@@ -20,6 +22,7 @@ public class ResultWriter {
 
     public void write() {
         try {
+            new File(htmlDirName).mkdirs();
             System.out.println("Writing to " + outputFile + "...");
             writeToFile();
         } catch (IOException e) {
@@ -47,11 +50,22 @@ public class ResultWriter {
             case Crawled:
                 if (numPagesWritten >= storedPageNum)
                     return "ignored";
-                String fileName = "page" + numPagesWritten + ".html";
+                String fileName = htmlDirName + File.separator + "page" + numPagesWritten + ".html";
+                writeContentToFile(fileName, page.getContent());
                 numPagesWritten++;
                 return fileName;
             default:
                 return "";
+        }
+    }
+
+    private void writeContentToFile(String fileName, String content) {
+        try {
+            PrintWriter writer = new PrintWriter(fileName, "UTF-8");
+            writer.write(content);
+            writer.close();
+        } catch (IOException e) {
+            System.err.println("[ERROR] ResultWriter.writeContentToFile: " + fileName + ": " + e.getMessage());
         }
     }
 

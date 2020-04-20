@@ -12,3 +12,4 @@ bin
 
 # Ignore crawled output result
 res.txt
+html
