@@ -3,13 +3,16 @@
 
 # Ignore Gradle build output directory
 build
-.vscode
 bin
 .settings
 .classpath
 .project
-.idea
 
 # Ignore crawled output result
 res.txt
 html
+
+# Miscellaneous
+.vscode
+.DS_Store
+.idea
