@@ -62,6 +62,10 @@ public class Crawler {
         return indexedUrlTree.getAllUrls();
     }
 
+    public int getNumUrlsCrawled() {
+        return indexedUrlTree.getNumUrls();
+    }
+
     public void shutdown() {
         Crawler.IS_CRAWLING = false;
         for (BufferedUrlList bufferedUrlList : bufferedUrlLists) {

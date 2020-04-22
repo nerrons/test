@@ -15,6 +15,8 @@ public class Main {
     private String output = "res.txt";
     @Parameter(names = { "-storedPageNum" })
     private int storedPageNum = 100;
+    @Parameter(names = { "-debug" })
+    public static boolean debug = false;
 
     public static void main(String[] args) throws InterruptedException {
         Main main = new Main();
@@ -33,10 +35,15 @@ public class Main {
         Crawler crawler = new Crawler(baseUrls, storedPageNum);
         crawler.start();
 
-        try {
-            Thread.sleep(time.toMillis());
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        long end = System.currentTimeMillis() + time.toMillis();
+        while (System.currentTimeMillis() < end) {
+            // print number of URLs crawled every minute
+            try {
+                Thread.sleep(60 * 1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println("[INFO] number of URLs crawled: " + crawler.getNumUrlsCrawled());
         }
 
         crawler.shutdown();

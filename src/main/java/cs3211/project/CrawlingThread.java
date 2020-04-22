@@ -44,7 +44,9 @@ public class CrawlingThread implements Runnable {
         } catch (Exception e) {
             page.setStatus(Status.Dead);
             addToBufferedUrlList(page, null);
-            System.err.println("[WARNING] CrawlingThread.visit error: " + page.getUrl() + ": " + e.getMessage());
+            if (Main.debug) {
+                System.err.println("[WARNING] CrawlingThread.visit error: " + page.getUrl() + ": " + e.getMessage());
+            }
             errorUrls.add(page.getUrl());
             // e.printStackTrace();
         }
