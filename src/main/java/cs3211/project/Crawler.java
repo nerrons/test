@@ -1,7 +1,6 @@
 package cs3211.project;
 
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
@@ -58,7 +57,7 @@ public class Crawler {
         }
     }
 
-    public ConcurrentHashMap<String, Page> getAllUrlsCrawled() {
+    public ArrayList<Page> getAllUrlsCrawled() {
         return indexedUrlTree.getAllUrls();
     }
 

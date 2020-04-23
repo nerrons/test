@@ -20,6 +20,7 @@ public class CrawlingThread implements Runnable {
         this.urlsToCrawl = urls;
         this.bufferedUrlList = bufferedUrlList;
         this.indexUrlTree = indexUrlTree;
+        System.out.println(Thread.currentThread().getName() + ": " + urlsToCrawl.size());
     }
 
     @Override

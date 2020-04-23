@@ -5,16 +5,16 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.ArrayList;
 
 public class ResultWriter {
     private static String htmlDirName = "html";
     private int numPagesWritten = 0;
     private int storedPageNum;
     private String outputFile;
-    private ConcurrentHashMap<String, Page> result;
+    private ArrayList<Page> result;
 
-    public ResultWriter(String outputFile, int storedPageNum, ConcurrentHashMap<String, Page> result) {
+    public ResultWriter(String outputFile, int storedPageNum, ArrayList<Page> result) {
         this.outputFile = outputFile;
         this.storedPageNum = storedPageNum;
         this.result = result;
@@ -34,7 +34,7 @@ public class ResultWriter {
 
     private void writeToFile() throws FileNotFoundException, UnsupportedEncodingException {
         PrintWriter writer = new PrintWriter(outputFile, "UTF-8");
-        for (Page page : result.values()) {
+        for (Page page : result) {
             String line = page.getParentUrl() + " --> " + page.getUrl() + " : " + writeContentAndGetStatus(page);
             writer.println(line);
         }
@@ -70,7 +70,7 @@ public class ResultWriter {
     }
 
     private void writeOutStdout() {
-        for (Page page : result.values()) {
+        for (Page page : result) {
             System.out.println(page.getParentUrl() + " --> " + page.getUrl());
         }
     }
