@@ -7,8 +7,8 @@ import java.util.LinkedList;
 
 public class Crawler {
     public static volatile boolean IS_CRAWLING = false;
-    private static final int BUL_SIZE = 3;
-    private static final int CT_PER_BUL = 2;
+    private static final int BUL_SIZE = 5;
+    private static final int CT_PER_BUL = 4;
     private IndexedUrlTree indexedUrlTree;
     private BufferedUrlList[] bufferedUrlLists = new BufferedUrlList[BUL_SIZE];
     private List<Thread> crawlingThreads = new ArrayList<Thread>();

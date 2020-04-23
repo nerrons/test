@@ -34,11 +34,12 @@ public class CrawlingThread implements Runnable {
             }
             visit(page);
         }
+        System.out.println("[INFO] " + Thread.currentThread().getName() + " has finished");
     }
 
     private void visit(Page page) {
         try {
-            Document doc = Jsoup.connect(page.getUrl()).userAgent("Mozilla").timeout(10 * 1000).get();
+            Document doc = Jsoup.connect(page.getUrl()).userAgent("Mozilla").timeout(15 * 1000).get();
             addToBufferedUrlList(page, doc);
             extractLinks(page.getUrl(), doc);
         } catch (Exception e) {
