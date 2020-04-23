@@ -1,0 +1,8 @@
+﻿#alphabet VMH{on,coin,choc,off};
+#alphabet BISCLOV {coin,choc,bisc};
+
+VHM = on->choc->off->VHM;
+CUST=on->(coin->bisc->CUST[]curse->coin->choc->CUST);
+
+System2=VMH||CUST;
+#assert System2 deadlockfree;

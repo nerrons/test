@@ -1,0 +1,15 @@
+﻿#alphabet GREEDY {coin,choc,bisc};
+GREEDY=choc->GREEDY[]bisc->GREEDY;
+VMC=coin->(choc->VMC[]bisc->VMC);
+System4=VMC||GREEDY;
+#assert System4 deadlockfree;
+
+#alphabet VM{coin,choc,bisc};
+#alphabet BISCLOV {coin,choc,bisc};
+
+VM=coin->choc->VM;
+
+BISCLOV=coin->bisc->BISCLOV;
+
+System5 = VM || BISCLOV;
+#assert System5 deadlockfree; 
