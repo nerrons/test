@@ -1,0 +1,64 @@
+﻿#import "ArrayUtil";
+//@@Data Race Model@@
+
+
+var urls = [1,2,3,4,5,6,7,8,9];
+var iut[9];
+var flag = false;
+//P()=a->P();
+//#alphabet{input,output}
+var index=0;
+
+INSERT()=insertiut{
+	
+		if(index>=0 && index<9){
+			var i=0;
+			while(i<index){
+				if(urls[index]==urls[i]){
+					if(index<9){
+						index++;
+						i=-1;
+					}
+				}
+				i=i+1;
+			}
+			iut[index]=urls[index];
+		}
+		index=index+1;
+}->Skip;
+
+CT()=if(index<9){INSERT();CT()};
+
+
+System= CT() || CT();
+
+
+
+
+
+//CT() = insertiut{
+//	while(index<9){
+//		if(index>=0 && index<9){
+//			iut[index]=urls[index];
+//		}
+//		index=index+1;
+//	};
+//}->CT();
+//
+//CT1() = insertiut{
+//	while(index<9){
+//		if(index>=0 && index<9){
+//			iut[index]=urls[index]+10;
+//		}
+//		index=index+1;
+//	};
+//}->CT1();	
+
+	
+//iut=call(insertValue,urls[index++],index);}->CT();
+
+#define goal (flag==call(isDuplicated,iut));
+//#define insert (iut==call(insertValue,value,index));
+#assert System() deadlockfree;
+
+#assert CT() reaches goal;

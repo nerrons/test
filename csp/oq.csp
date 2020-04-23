@@ -1,0 +1,10 @@
+﻿P(i)=a.i->Q(i);
+Q(i)=b.i->P(i);
+
+System()=P(2)||Q(1);
+
+//#import "PAT.Lib.Set";
+//var<Set> set1;
+//Q()=P(set1);
+//P(i)=add1{i.Add(1);}->Skip[]add2{i.Add(2);}->Skip;
+////Q()=if(cond){P();Q()};
