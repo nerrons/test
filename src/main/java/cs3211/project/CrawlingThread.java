@@ -20,7 +20,6 @@ public class CrawlingThread implements Runnable {
         this.urlsToCrawl = urls;
         this.bufferedUrlList = bufferedUrlList;
         this.indexUrlTree = indexUrlTree;
-        System.out.println(Thread.currentThread().getName() + ": " + urlsToCrawl.size());
     }
 
     @Override
@@ -30,10 +29,12 @@ public class CrawlingThread implements Runnable {
                 return;
             }
             Page page = urlsToCrawl.pop();
-            if (indexUrlTree.contains(page.getUrl())) {
-                continue;
+            if (indexUrlTree.hasEnoughPages()) {
+                page.setStatus(Status.Ignored);
             }
-            visit(page);
+            if (!indexUrlTree.contains(page.getUrl())) {
+                visit(page);
+            }
         }
         System.out.println("[INFO] " + Thread.currentThread().getName() + " has finished");
     }
@@ -66,11 +67,7 @@ public class CrawlingThread implements Runnable {
                     e.printStackTrace();
                 }
             }
-            if (page.getStatus() == Status.Dead) {
-                // do nothing
-            } else if (indexUrlTree.hasEnoughPages()) {
-                page.setStatus(Status.Ignored);
-            } else {
+            if (page.getStatus() == Status.Crawled) {
                 page.setContent(doc.toString());
             }
             bufferedUrlList.addToList(page);

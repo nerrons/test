@@ -1,10 +1,8 @@
 package cs3211.project;
 
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
 public class ResultWriter {
@@ -12,31 +10,33 @@ public class ResultWriter {
     private int numPagesWritten = 0;
     private int storedPageNum;
     private String outputFile;
-    private ArrayList<Page> result;
 
-    public ResultWriter(String outputFile, int storedPageNum, ArrayList<Page> result) {
+    public ResultWriter(String outputFile, int storedPageNum) {
         this.outputFile = outputFile;
         this.storedPageNum = storedPageNum;
-        this.result = result;
-    }
-
-    public void write() {
         try {
             new File(htmlDirName).mkdirs();
-            System.out.println("Writing to " + outputFile + "...");
-            writeToFile();
-        } catch (IOException e) {
-            System.err.println("ResultWriter.writeToFile error: " + e.getMessage());
-            writeOutStdout();
+        } catch (Exception e) {
+            System.err.println("[ERROR] ResultWriter(): " + e.getMessage());
         }
-        System.out.println("Crawled " + result.size() + " URLs");
     }
 
-    private void writeToFile() throws FileNotFoundException, UnsupportedEncodingException {
-        PrintWriter writer = new PrintWriter(outputFile, "UTF-8");
+    public void write(ArrayList<Page> result) {
+        try {
+            System.out.println("Writing to " + outputFile + "...");
+            writeToFile(result);
+        } catch (IOException e) {
+            System.err.println("ResultWriter.writeToFile error: " + e.getMessage());
+            writeOutStdout(result);
+        }
+        System.out.println("Written " + result.size() + " new URLs to " + outputFile);
+    }
+
+    private void writeToFile(ArrayList<Page> result) throws IOException {
+        FileWriter writer = new FileWriter(outputFile, true);
         for (Page page : result) {
-            String line = page.getParentUrl() + " --> " + page.getUrl() + " : " + writeContentAndGetStatus(page);
-            writer.println(line);
+            String line = page.getParentUrl() + " --> " + page.getUrl() + " : " + writeContentAndGetStatus(page) + '\n';
+            writer.write(line);
         }
         writer.close();
     }
@@ -61,7 +61,7 @@ public class ResultWriter {
 
     private void writeContentToFile(String fileName, String content) {
         try {
-            PrintWriter writer = new PrintWriter(fileName, "UTF-8");
+            FileWriter writer = new FileWriter(fileName);
             writer.write(content);
             writer.close();
         } catch (IOException e) {
@@ -69,7 +69,7 @@ public class ResultWriter {
         }
     }
 
-    private void writeOutStdout() {
+    private void writeOutStdout(ArrayList<Page> result) {
         for (Page page : result) {
             System.out.println(page.getParentUrl() + " --> " + page.getUrl());
         }

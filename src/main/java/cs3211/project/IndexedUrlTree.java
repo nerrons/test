@@ -6,34 +6,36 @@ import java.util.List;
 
 public class IndexedUrlTree {
     private int storedPageNum;
-    private HashSet<String> seenUrls = new HashSet<String>();
-    private ArrayList<Page> allUrls = new ArrayList<Page>();
+    private HashSet<String> allSeenUrls = new HashSet<String>();
+    private ArrayList<Page> newUrls = new ArrayList<Page>();
 
     public IndexedUrlTree(int storedPageNum) {
         this.storedPageNum = storedPageNum;
     }
 
     public synchronized boolean contains(String url) {
-        boolean contains = seenUrls.contains(url);
+        boolean contains = allSeenUrls.contains(url);
         if (!contains) {
-            seenUrls.add(url);
+            allSeenUrls.add(url);
         }
         return contains;
     }
 
     public synchronized void addPages(List<Page> pages) {
-        allUrls.addAll(pages);
+        newUrls.addAll(pages);
     }
 
-    public synchronized ArrayList<Page> getAllUrls() {
-        return allUrls;
+    public synchronized ArrayList<Page> getAndClearNewUrls() {
+        ArrayList<Page> result = new ArrayList<Page>(newUrls);
+        newUrls.clear();
+        return result;
     }
 
     public synchronized int getNumUrls() {
-        return allUrls.size();
+        return allSeenUrls.size();
     }
 
     public synchronized boolean hasEnoughPages() {
-        return allUrls.size() >= storedPageNum;
+        return allSeenUrls.size() >= storedPageNum * 1.1;
     }
 }

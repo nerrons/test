@@ -32,22 +32,38 @@ public class Main {
             return;
         }
 
+        ResultWriter writer = new ResultWriter(output, storedPageNum);
+
         Crawler crawler = new Crawler(baseUrls, storedPageNum);
         crawler.start();
 
-        long end = System.currentTimeMillis() + time.toMillis();
+        long start = System.currentTimeMillis();
+        long end = start + time.toMillis();
+        long oneHourInMillis = 60 * 60 * 1000;
+        long timeToWriteUrls = start + oneHourInMillis;
         while (System.currentTimeMillis() < end) {
-            // print number of URLs crawled every minute
             try {
                 Thread.sleep(60 * 1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+            if (System.currentTimeMillis() > timeToWriteUrls) {
+                // write urls to file every hour
+                writer.write(crawler.getNewUrlsCrawled());
+                timeToWriteUrls = System.currentTimeMillis() + oneHourInMillis;
+            }
+            // print number of URLs crawled every minute
             System.out.println("[INFO] number of URLs crawled: " + crawler.getNumUrlsCrawled());
         }
 
         crawler.shutdown();
-        ResultWriter writer = new ResultWriter(output, storedPageNum, crawler.getAllUrlsCrawled());
-        writer.write();
+
+        try {
+            Thread.sleep(10 * 1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        writer.write(crawler.getNewUrlsCrawled());
+        System.out.println("[INFO] total number of URLs crawled: " + crawler.getNumUrlsCrawled());
     }
 }

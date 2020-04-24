@@ -57,8 +57,8 @@ public class Crawler {
         }
     }
 
-    public ArrayList<Page> getAllUrlsCrawled() {
-        return indexedUrlTree.getAllUrls();
+    public ArrayList<Page> getNewUrlsCrawled() {
+        return indexedUrlTree.getAndClearNewUrls();
     }
 
     public int getNumUrlsCrawled() {
