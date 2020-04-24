@@ -1,6 +1,8 @@
 ﻿#import "ArrayUtil";
 //@@Data Race Model@@
+#import "PAT.Lib.Set";
 
+var<Set> set1;
 
 var urls = [1,2,3,4,5,6,7,8,9];
 var iut[9];
@@ -8,9 +10,8 @@ var flag = false;
 //P()=a->P();
 //#alphabet{input,output}
 var index=0;
-
+var readNumber=0;
 INSERT()=insertiut{
-	
 		if(index>=0 && index<9){
 			var i=0;
 			while(i<index){
@@ -22,10 +23,22 @@ INSERT()=insertiut{
 				}
 				i=i+1;
 			}
-			iut[index]=urls[index];
+			//iut[index]=urls[index];
+			set1.Add(urls[index])
 		}
 		index=index+1;
-}->Skip;
+}->Skip[]insertiut{
+		if(index>=0 && index<9){
+			var i=0;
+			while(set1.Contains(urls[index])&&index<8){
+				index++;				
+			} 
+			if(index<=8&&!set1.Contains(urls[index])){
+			readNumber=urls[index];
+			}
+		}
+		index=index+1;
+}->afterinsert{			set1.Add(urls[index])}->Skip;
 
 CT()=if(index<9){INSERT();CT()};
 
