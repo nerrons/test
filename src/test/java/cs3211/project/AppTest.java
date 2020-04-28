@@ -4,11 +4,20 @@
 package cs3211.project;
 
 import org.junit.Test;
+
 import static org.junit.Assert.*;
+
 
 public class AppTest {
     @Test public void testAppHasAGreeting() {
+
         App classUnderTest = new App();
+
+        assertEquals("Hello world.", classUnderTest.getGreeting());
+
         assertNotNull("app should have a greeting", classUnderTest.getGreeting());
+
     }
+
+
 }
