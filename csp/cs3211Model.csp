@@ -1,0 +1,65 @@
+﻿#import "ArrayUtil";
+//@@Data Race Model@@
+#import "PAT.Lib.Set";
+#define N 1;
+var<Set> set1;
+
+var baseUrls = [1,2,3,4,5,6,7,8,9];
+var iut[9];
+var flag = false;
+
+var readNumber=0;   
+//channel c[9] 0;
+channel ind 0;
+
+INSERT(index)=ind!index->if(index>=9){Skip()}else{insertiut{
+		if(index>=0 && index<9){
+			var i=0;
+//			while(set1.Contains(baseUrls[index])&&index<8){
+//				index++;				
+//			} 
+			if(index<=8&&!set1.Contains(baseUrls[index])){
+			readNumber=baseUrls[index];
+			}
+		}
+		
+}->afterinsert{set1.Add(readNumber);iut[index]=readNumber;}->if(index>=8){Stop()}else{ind?(index+1)->Skip}};
+
+GATE()=ind?0->Skip();
+
+P(i)=|||ii:{0..8}@INSERT(ii);
+
+System=|||i:{0..N-1}@P(i)|||GATE();
+
+
+
+
+#define goal (flag==call(isDuplicated,iut));
+//#define insert (iut==call(insertValue,value,index));
+#assert System() deadlockfree;
+#assert System reaches goal;
+
+
+
+
+//CT() = insertiut{
+//	while(index<9){
+//		if(index>=0 && index<9){
+//			iut[index]=urls[index];
+//		}
+//		index=index+1;
+//	};
+//}->CT();
+//
+//CT1() = insertiut{
+//	while(index<9){
+//		if(index>=0 && index<9){
+//			iut[index]=urls[index]+10;
+//		}
+//		index=index+1;
+//	};
+//}->CT1();	
+
+	
+//iut=call(insertValue,urls[index++],index);}->CT();
+
